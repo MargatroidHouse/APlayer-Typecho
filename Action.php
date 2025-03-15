@@ -389,7 +389,7 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $allowCors = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->cors;
         // 将域名列表按换行分隔
-        $allowCors = explode("\n", $allowCors);
+        $allowCors = explode("\r\n", $allowCors);
         if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowCors)) {
             header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
             header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Connection, User-Agent, Cookie");
