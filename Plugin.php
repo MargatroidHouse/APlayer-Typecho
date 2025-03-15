@@ -8,13 +8,13 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
  *
  * @package APlayer for Typecho | Meting
  * @author METO
- * @version 2.1.2
+ * @version 2.1.3
  * @dependence 14.10.10-*
  * @link https://github.com/MoePlayer/APlayer-Typecho
  *
  */
 
-define('METING_VERSION', '2.1.2');
+define('METING_VERSION', '2.1.3');
 
 class Meting_Plugin extends Typecho_Widget implements Typecho_Plugin_Interface
 {
@@ -157,6 +157,14 @@ class Meting_Plugin extends Typecho_Widget implements Typecho_Plugin_Interface
         );
         $form->addInput($t);
         $t = new Typecho_Widget_Helper_Form_Element_Textarea(
+            'cors',
+            null,
+            '',
+            _t('* 跨域白名单'),
+            _t('设置允许跨域访问的域名，一行一个。<br><b>默认为空，则仅允许本站请求。</b>')
+        );
+        $form->addInput($t);
+        $t = new Typecho_Widget_Helper_Form_Element_Textarea(
             'cookie',
             null,
             '',
@@ -213,6 +221,12 @@ class Meting_Plugin extends Typecho_Widget implements Typecho_Plugin_Interface
     public static function header()
     {
         $api = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->api;
+        // 如果API开头为/，则自动判断域名拼接
+        if (substr($api, 0, 1) == '/') {
+            // 获得当前协议
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+            $api = $protocol . $_SERVER['HTTP_HOST'] . $api;
+        }
         $dir = Helper::options()->pluginUrl.'/Meting/assets';
         $ver = METING_VERSION;
         echo "<link rel=\"stylesheet\" href=\"{$dir}/APlayer.min.css?v={$ver}\">\n";
@@ -274,29 +288,29 @@ class Meting_Plugin extends Typecho_Widget implements Typecho_Plugin_Interface
                 $salt = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->salt;
                 $auth = md5($salt.$data['server'].$data['type'].$data['id'].$salt);
 
-                $str .= "<div class=\"aplayer\" data-id=\"{$data['id']}\" data-server=\"{$data['server']}\" data-type=\"{$data['type']}\" data-auth=\"{$auth}\"";
+                $str .= "<meting-js id=\"{$data['id']}\" server=\"{$data['server']}\" type=\"{$data['type']}\" auth=\"{$auth}\"";
                 if (is_array($setting)) {
                     foreach ($setting as $key => $vo) {
                         $player[$key] = $vo;
                     }
                 }
                 foreach ($player as $key => $vo) {
-                    $str .= " data-{$key}=\"{$vo}\"";
+                    $str .= " {$key}=\"{$vo}\"";
                 }
-                $str .= "></div>\n";
+                $str .= "></meting-js>\n";
             } else {
                 $data = $t;
 
-                $str .= "<div class=\"aplayer\" data-name=\"{$data['title']}\" data-artist=\"{$data['author']}\" data-url=\"{$data['url']}\" data-cover=\"{$data['pic']}\" data-lrc=\"{$data['lrc']}\"";
+                $str .= "<meting-js name=\"{$data['title']}\" artist=\"{$data['author']}\" url=\"{$data['url']}\" cover=\"{$data['pic']}\" lrc=\"{$data['lrc']}\"";
                 if (is_array($setting)) {
                     foreach ($setting as $key => $vo) {
                         $player[$key] = $vo;
                     }
                 }
                 foreach ($player as $key => $vo) {
-                    $str .= " data-{$key}=\"{$vo}\"";
+                    $str .= " {$key}=\"{$vo}\"";
                 }
-                $str .= "></div>\n";
+                $str .= "></meting-js>\n";
             }
         }
         return $str;

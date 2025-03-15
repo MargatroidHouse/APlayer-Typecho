@@ -5,9 +5,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
 
 class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
 {
-    public function execute()
-    {
-    }
+    public function execute() {}
 
     public function action()
     {
@@ -18,10 +16,10 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
 
     private function check($server, $type, $id)
     {
-        if (!in_array($server, array('netease','tencent','baidu','xiami','kugou'))) {
+        if (!in_array($server, array('netease', 'tencent', 'baidu', 'xiami', 'kugou'))) {
             return false;
         }
-        if (!in_array($type, array('song','album','search','artist','playlist','lrc','url','pic'))) {
+        if (!in_array($type, array('song', 'album', 'search', 'artist', 'playlist', 'lrc', 'url', 'pic'))) {
             return false;
         }
         if (empty($id)) {
@@ -62,7 +60,7 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
                 $cachehost = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->cachehost;
                 $cacheport = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->cacheport;
                 include_once 'driver/cache.interface.php';
-                include_once 'driver/'.$cachetype.'.class.php';
+                include_once 'driver/' . $cachetype . '.class.php';
                 $this->cache = new MetingCache(array(
                     'host' => $cachehost,
                     'port' => $cacheport
@@ -71,11 +69,11 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
         }
 
         // auth 验证
-        $EID = $server.$type.$id;
+        $EID = $server . $type . $id;
         $salt = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->salt;
 
         if (!empty($salt)) {
-            $auth1 = md5($salt.$EID.$salt);
+            $auth1 = md5($salt . $EID . $salt);
             $auth2 = $this->request->get('auth');
             if (strcmp($auth1, $auth2)) {
                 http_response_code(403);
@@ -140,14 +138,14 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
             if (empty($url)) {
                 $url = 'https://coding.meting.api.i-meto.com/empty.mp3';
                 if ($server == 'netease') {
-                    $url = 'https://music.163.com/song/media/outer/url?id='.$id.'.mp3';
+                    $url = 'https://music.163.com/song/media/outer/url?id=' . $id . '.mp3';
                 }
             }
             $this->response->redirect($url);
         }
 
         // 其它类别解析
-        if (in_array($type, array('song','album','search','artist','playlist'))) {
+        if (in_array($type, array('song', 'album', 'search', 'artist', 'playlist'))) {
             $data = $this->cacheRead($EID);
             if (empty($data)) {
                 $data = $api->$type($id);
@@ -161,9 +159,9 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
                 $music[] = array(
                     'name'   => $vo['name'],
                     'artist' => implode(' / ', $vo['artist']),
-                    'url'    => $url.'?server='.$vo['source'].'&type=url&id='.$vo['url_id'].'&auth='.md5($salt.$vo['source'].'url'.$vo['url_id'].$salt),
-                    'cover'  => $url.'?server='.$vo['source'].'&type=pic&id='.$vo['pic_id'].'&auth='.md5($salt.$vo['source'].'pic'.$vo['pic_id'].$salt),
-                    'lrc'    => $url.'?server='.$vo['source'].'&type=lrc&id='.$vo['lyric_id'].'&auth='.md5($salt.$vo['source'].'lrc'.$vo['lyric_id'].$salt),
+                    'url'    => $url . '?server=' . $vo['source'] . '&type=url&id=' . $vo['url_id'] . '&auth=' . md5($salt . $vo['source'] . 'url' . $vo['url_id'] . $salt),
+                    'cover'  => $url . '?server=' . $vo['source'] . '&type=pic&id=' . $vo['pic_id'] . '&auth=' . md5($salt . $vo['source'] . 'pic' . $vo['pic_id'] . $salt),
+                    'lrc'    => $url . '?server=' . $vo['source'] . '&type=lrc&id=' . $vo['lyric_id'] . '&auth=' . md5($salt . $vo['source'] . 'lrc' . $vo['lyric_id'] . $salt),
                 );
             }
             header("Content-Type: application/javascript");
@@ -184,66 +182,66 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
         if (strpos($url, '163.com') !== false) {
             $server = 'netease';
             if (preg_match('/playlist\?id=(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/toplist\?id=(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/album\?id=(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'album');
+                list($id, $type) = array($id[1], 'album');
             } elseif (preg_match('/song\?id=(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'song');
+                list($id, $type) = array($id[1], 'song');
             } elseif (preg_match('/artist\?id=(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'artist');
+                list($id, $type) = array($id[1], 'artist');
             }
         } elseif (strpos($url, 'qq.com') !== false) {
             $server = 'tencent';
             if (preg_match('/playsquare\/([^\.]*)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/playlist\/([^\.]*)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/album\/([^\.]*)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'album');
+                list($id, $type) = array($id[1], 'album');
             } elseif (preg_match('/song\/([^\.]*)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'song');
+                list($id, $type) = array($id[1], 'song');
             } elseif (preg_match('/singer\/([^\.]*)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'artist');
+                list($id, $type) = array($id[1], 'artist');
             }
         } elseif (strpos($url, 'xiami.com') !== false) {
             $server = 'xiami';
             if (preg_match('/collect\/(\w+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/album\/(\w+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'album');
+                list($id, $type) = array($id[1], 'album');
             } elseif (preg_match('/[\/.]\w+\/[songdem]+\/(\w+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'song');
+                list($id, $type) = array($id[1], 'song');
             } elseif (preg_match('/artist\/(\w+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'artist');
+                list($id, $type) = array($id[1], 'artist');
             }
             if (!preg_match('/^\d*$/i', $id, $t)) {
                 $data = self::curl($url);
-                preg_match('/'.$type.'\/(\d+)/i', $data, $id);
+                preg_match('/' . $type . '\/(\d+)/i', $data, $id);
                 $id = $id[1];
             }
         } elseif (strpos($url, 'kugou.com') !== false) {
             $server = 'kugou';
             if (preg_match('/special\/single\/(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/#hash\=(\w+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'song');
+                list($id, $type) = array($id[1], 'song');
             } elseif (preg_match('/album\/[single\/]*(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'album');
+                list($id, $type) = array($id[1], 'album');
             } elseif (preg_match('/singer\/[home\/]*(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'artist');
+                list($id, $type) = array($id[1], 'artist');
             }
         } elseif (strpos($url, 'baidu.com') !== false) {
             $server = 'baidu';
             if (preg_match('/songlist\/(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'playlist');
+                list($id, $type) = array($id[1], 'playlist');
             } elseif (preg_match('/album\/(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'album');
+                list($id, $type) = array($id[1], 'album');
             } elseif (preg_match('/song\/(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'song');
+                list($id, $type) = array($id[1], 'song');
             } elseif (preg_match('/artist\/(\d+)/i', $url, $id)) {
-                list($id, $type) = array($id[1],'artist');
+                list($id, $type) = array($id[1], 'artist');
             }
         } else {
             die("[Meting]\n[Music title=\"歌曲名\" author=\"歌手\" url=\"{$url}\" pic=\"图片文件URL\" lrc=\"歌词文件URL\"/]\n[/Meting]\n");
@@ -253,7 +251,6 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
             $id = '';
         }
         die("[Meting]\n[Music server=\"{$server}\" id=\"{$id}\" type=\"{$type}\"/]\n[/Meting]\n");
-
     }
 
     private function lrctrim($lyrics)
@@ -283,8 +280,8 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
         $len1 = count($lyric);
         $len2 = count($tlyric);
         $result = "";
-        for ($i=0,$j=0; $i<$len1&&$j<$len2; $i++) {
-            while ($lyric[$i][0]>$tlyric[$j][0]&&$j+1<$len2) {
+        for ($i = 0, $j = 0; $i < $len1 && $j < $len2; $i++) {
+            while ($lyric[$i][0] > $tlyric[$j][0] && $j + 1 < $len2) {
                 $j++;
             }
             if ($lyric[$i][0] == $tlyric[$j][0]) {
@@ -295,9 +292,9 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
                 $j++;
             }
         }
-        for ($i=0; $i<$len1; $i++) {
+        for ($i = 0; $i < $len1; $i++) {
             $t = $lyric[$i][0];
-            $result .= sprintf("[%02d:%02d.%03d]%s\n", $t/60000, $t%60000/1000, $t%1000, $lyric[$i][2]);
+            $result .= sprintf("[%02d:%02d.%03d]%s\n", $t / 60000, $t % 60000 / 1000, $t % 1000, $lyric[$i][2]);
         }
         return $result;
     }
@@ -323,7 +320,7 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
         $shasum = $this->curl('https://raw.githubusercontent.com/MoePlayer/APlayer-Typecho/master/shasum.txt');
 
         echo "获取最新特征库...\n";
-        echo $shasum."\n\n";
+        echo $shasum . "\n\n";
 
         $shasum = explode("\n", $shasum);
         array_pop($shasum);
@@ -332,18 +329,20 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
 
         foreach ($shasum as $remote) {
             list($remote_sha256, $filename) = explode('  ', $remote);
-            if (!file_exists(__DIR__.'/'.$filename) ||
-                !hash_equals(hash('sha256', file_get_contents(__DIR__.'/'.$filename)), $remote_sha256)) {
-                echo "下载     ".$filename;
-                $url = 'https://raw.githubusercontent.com/MoePlayer/APlayer-Typecho/master'.substr($filename, 1);
+            if (
+                !file_exists(__DIR__ . '/' . $filename) ||
+                !hash_equals(hash('sha256', file_get_contents(__DIR__ . '/' . $filename)), $remote_sha256)
+            ) {
+                echo "下载     " . $filename;
+                $url = 'https://raw.githubusercontent.com/MoePlayer/APlayer-Typecho/master' . substr($filename, 1);
 
-                if (file_put_contents(__DIR__.'/'.$filename, $this->curl($url))) {
+                if (file_put_contents(__DIR__ . '/' . $filename, $this->curl($url))) {
                     echo " (OK)\n";
                 } else {
                     die("\n下载失败，错误信息: $url\n");
                 }
             } else {
-                echo "无需更新  ".$filename."\n";
+                echo "无需更新  " . $filename . "\n";
             }
         }
 
@@ -388,9 +387,29 @@ class Meting_Action extends Typecho_Widget implements Widget_Interface_Do
             header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Connection, User-Agent, Cookie");
             return;
         }
-        if (isset($_SERVER['HTTP_REFERER']) && parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) !== $_SERVER['HTTP_HOST']) {
-            http_response_code(403);
-            die('[]');
+        $allowCors = Typecho_Widget::widget('Widget_Options')->plugin('Meting')->cors;
+        // 将域名列表按换行分隔
+        $allowCors = explode("\n", $allowCors);
+        if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowCors)) {
+            header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+            header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Connection, User-Agent, Cookie");
+            return;
+        }
+        if (isset($_SERVER['HTTP_REFERER'])) {
+            $parseUrl = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
+            $skip = false;
+            // 循环判断allowCors中的域名是否匹配
+            foreach ($allowCors as $cors) {
+                if ($parseUrl === parse_url($cors, PHP_URL_HOST)) {
+                    $skip = true;
+                    break;
+                }
+            }
+            if ($skip) return;
+            if ($parseUrl !== $_SERVER['HTTP_HOST']) {
+                http_response_code(403);
+                die('[]');
+            }
         }
     }
 }
